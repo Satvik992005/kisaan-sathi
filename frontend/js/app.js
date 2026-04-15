@@ -144,3 +144,35 @@ async function testLoginConnection() {
 
 // Run once to test connection
 testLoginConnection();
+
+
+async function login() {
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
+
+  try {
+    const res = await fetch("https://kisaan-sathi.onrender.com/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      localStorage.setItem("ks_token", data.token);
+      localStorage.setItem("ks_user", JSON.stringify(data.user));
+
+      alert("Login successful ✅");
+      location.reload();
+    } else {
+      alert(data.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Error connecting to server");
+  }
+}

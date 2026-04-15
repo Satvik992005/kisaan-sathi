@@ -22,24 +22,35 @@ function switchAuthTab(tab) {
 /* ─── Login ────────────────────────────────────────────────────── */
 async function handleLogin(e) {
   e.preventDefault();
-  const btn = document.getElementById('login-submit-btn');
-  const email    = document.getElementById('login-email').value.trim();
-  const password = document.getElementById('login-password').value;
 
-  btn.disabled = true; btn.querySelector('.btn-text').textContent = 'Logging in…';
+  const email = document.getElementById("login-email").value;
+  const password = document.getElementById("login-password").value;
 
-  const data = await apiRequest('/auth/login', 'POST', { email, password });
+  try {
+    const res = await fetch("https://kisaan-sathi.onrender.com/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    });
 
-  btn.disabled = false; btn.querySelector('.btn-text').textContent = 'Login';
+    const data = await res.json();
 
-  if (data.success) {
-    saveAuthData(data.token, data.user);
-    closeAuthModal();
-    toast.success('Welcome back! 🌾', `Hello, ${data.user.name}`);
-    setAuthState(data.user);
-    showSection(KS.currentSection);
-  } else {
-    toast.error('Login Failed', data.message);
+    if (data.success) {
+      localStorage.setItem("ks_token", data.token);
+      localStorage.setItem("ks_user", JSON.stringify(data.user));
+
+      alert("Login successful ✅");
+      closeAuthModal();
+      location.reload();
+    } else {
+      alert(data.message);
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
   }
 }
 
