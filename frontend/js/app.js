@@ -92,6 +92,33 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+/* ─── TEMP REGISTER USER (TEST) ───────────────────────── */
+
+async function testRegister() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/auth/register`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        name: "Satvik",
+        email: "satvik@gmail.com",
+        password: "123456"
+      })
+    });
+
+    const data = await res.json();
+    console.log("Register Response:", data);
+
+  } catch (err) {
+    console.error("Register Error:", err);
+  }
+}
+
+// Run once
+testRegister();
+
 /* ─── Backend Connection Test ───────────────────────── */
 
 async function testLoginConnection() {
