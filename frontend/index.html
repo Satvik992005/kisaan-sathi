@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kisaan Sathi – Smart Agriculture & Marketplace Platform</title>
+  <meta name="description" content="Kisaan Sathi empowers Indian farmers with intelligent crop guidance, digital marketplace, and real-time communication. Buy and sell crops online with secure Razorpay payments." />
+  <meta name="keywords" content="kisaan sathi, agriculture, crop recommendation, farm marketplace, buy crops online" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     TOAST CONTAINER
+════════════════════════════════════════════════ -->
+<div id="toast-container"></div>
+
+<!-- ════════════════════════════════════════════════
+     LOADER OVERLAY
+════════════════════════════════════════════════ -->
+<div id="loader" class="loader-overlay">
+  <div class="loader-box">
+    <div class="loader-ring"></div>
+    <div class="loader-logo">🌾</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     AUTH MODAL
+════════════════════════════════════════════════ -->
+<div id="auth-modal" class="modal-overlay" onclick="handleModalBackdrop(event)">
+  <div class="modal auth-modal-content">
+    <button class="modal-close" onclick="closeAuthModal()" title="Close">✕</button>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="login-tab-btn" onclick="switchAuthTab('login')">Login</button>
+      <button class="auth-tab" id="register-tab-btn" onclick="switchAuthTab('register')">Register</button>
+    </div>
+
+    <!-- Login Form -->
+    <form id="login-form" onsubmit="handleLogin(event)">
+      <div class="auth-header">
+        <div class="auth-icon">🌿</div>
+        <h2>Welcome Back!</h2>
+        <p>Login to continue to Kisaan Sathi</p>
+      </div>
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <input type="email" id="login-email" placeholder="your@email.com" required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="Your password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="login-submit-btn">
+        <span class="btn-text">Login</span>
+        <span class="btn-spinner" style="display:none">⏳</span>
+      </button>
+      <p class="auth-switch">Don't have an account? <a onclick="switchAuthTab('register')">Register here</a></p>
+    </form>
+
+    <!-- Register Form -->
+    <form id="register-form" style="display:none" onsubmit="handleRegister(event)">
+      <div class="auth-header">
+        <div class="auth-icon">🌱</div>
+        <h2>Join Kisaan Sathi</h2>
+        <p>Create your account to get started</p>
+      </div>
+      <div class="form-group">
+        <label for="reg-name">Full Name *</label>
+        <input type="text" id="reg-name" placeholder="Your full name" required />
+      </div>
+      <div class="form-group">
+        <label for="reg-email">Email Address *</label>
+        <input type="email" id="reg-email" placeholder="your@email.com" required autocomplete="email" />
+      </div>
+      <div class="form-group">
+        <label for="reg-password">Password * (min 6 chars)</label>
+        <input type="password" id="reg-password" placeholder="Create a strong password" required minlength="6" autocomplete="new-password" />
+      </div>
+      <div class="form-group">
+        <label for="reg-role">I am a</label>
+        <select id="reg-role">
+          <option value="buyer">🛒 Buyer – Purchase crops</option>
+          <option value="farmer">🌾 Farmer – Sell my crops</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="reg-phone">Phone (optional)</label>
+          <input type="tel" id="reg-phone" placeholder="+91 XXXXXXXXXX" />
+        </div>
+        <div class="form-group">
+          <label for="reg-location">Location (optional)</label>
+          <input type="text" id="reg-location" placeholder="City / Village" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-full" id="register-submit-btn">
+        <span class="btn-text">Create Account</span>
+        <span class="btn-spinner" style="display:none">⏳</span>
+      </button>
+      <p class="auth-switch">Already have an account? <a onclick="switchAuthTab('login')">Login here</a></p>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-brand" onclick="showSection('home')" title="Home">
+    <span class="brand-icon">🌾</span>
+    <span class="brand-text">Kisaan<span class="brand-accent">Sathi</span></span>
+  </div>
+
+  <button class="nav-toggle" id="nav-toggle" onclick="toggleMobileMenu()" title="Menu">☰</button>
+
+  <ul class="nav-links" id="nav-links">
+    <li><a class="nav-link active" data-section="home" onclick="showSection('home')">Home</a></li>
+    <li><a class="nav-link" data-section="marketplace" onclick="showSection('marketplace')">🏪 Marketplace</a></li>
+    <li><a class="nav-link" data-section="crop" onclick="showSection('crop')">🌱 Crop Advisor</a></li>
+    <li class="auth-required" style="display:none"><a class="nav-link farmer-only" data-section="dashboard" onclick="showSection('dashboard')">📊 Dashboard</a></li>
+    <li class="auth-required" style="display:none"><a class="nav-link" data-section="orders" onclick="showSection('orders')">📦 My Orders</a></li>
+    <li class="auth-required" style="display:none"><a class="nav-link" data-section="chat" onclick="showSection('chat')">💬 Chat</a></li>
+  </ul>
+
+  <div class="nav-actions">
+    <!-- Cart Button -->
+    <button class="cart-btn auth-required" id="cart-nav-btn" onclick="showSection('cart')" style="display:none" title="Cart">
+      🛒 <span class="cart-badge" id="cart-count">0</span>
+    </button>
+
+    <!-- Guest Actions -->
+    <div class="guest-actions" id="guest-actions">
+      <button class="btn btn-secondary btn-sm" onclick="openAuthModal('login')" id="nav-login-btn">Login</button>
+      <button class="btn btn-primary btn-sm" onclick="openAuthModal('register')" id="nav-register-btn">Register</button>
+    </div>
+
+    <!-- User Menu -->
+    <div class="nav-user" id="user-nav" style="display:none">
+      <div class="user-avatar" id="nav-avatar" title="Profile">A</div>
+      <div class="user-info">
+        <span class="user-name" id="nav-user-name">User</span>
+        <span class="user-role" id="nav-user-role">buyer</span>
+      </div>
+      <button class="btn btn-danger btn-sm" onclick="logout()" title="Logout">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════
+     MAIN CONTENT
+════════════════════════════════════════════════ -->
+<main id="main-content">
+
+  <!-- ══════════════════════ HOME SECTION ══════════════════════ -->
+  <section id="section-home" class="section active">
+    <!-- Hero -->
+    <div class="hero">
+      <div class="hero-bg"></div>
+      <div class="hero-content container">
+        <div class="hero-left">
+          <div class="hero-badge">🇮🇳 Made for Indian Farmers</div>
+          <h1 class="hero-title">
+            Smart Farming<br/>
+            <span class="highlight">Starts Here</span>
+          </h1>
+          <p class="hero-desc">
+            Kisaan Sathi empowers farmers with AI-powered crop guidance, a digital marketplace, and real-time buyer–seller communication — all in one platform.
+          </p>
+          <div class="hero-actions">
+            <button class="btn btn-primary btn-lg" onclick="showSection('marketplace')">🏪 Browse Marketplace</button>
+            <button class="btn btn-secondary btn-lg" onclick="showSection('crop')">🌱 Crop Advisor</button>
+          </div>
+          <div class="hero-stats">
+            <div class="hero-stat">
+              <div class="hero-stat-num">15+</div>
+              <div class="hero-stat-label">Crop Varieties</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">100%</div>
+              <div class="hero-stat-label">Secure Payments</div>
+            </div>
+            <div class="hero-stat">
+              <div class="hero-stat-num">Live</div>
+              <div class="hero-stat-label">Chat Support</div>
+            </div>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="hero-card">
+            <div class="hero-card-title">✨ Platform Features</div>
+            <div class="hero-card-main">Everything a farmer needs</div>
+            <div class="hero-features-mini">
+              <div class="hero-feature-mini">
+                <div class="hero-feature-mini-icon">🌱</div>
+                <div class="hero-feature-mini-text">
+                  <div class="hero-feature-mini-name">Crop Recommendation</div>
+                  <div class="hero-feature-mini-desc">Based on soil, weather & climate</div>
+                </div>
+                <div class="hero-feature-mini-badge">AI</div>
+              </div>
+              <div class="hero-feature-mini">
+                <div class="hero-feature-mini-icon">🛒</div>
+                <div class="hero-feature-mini-text">
+                  <div class="hero-feature-mini-name">Digital Marketplace</div>
+                  <div class="hero-feature-mini-desc">List & sell your crops online</div>
+                </div>
+                <div class="hero-feature-mini-badge">Live</div>
+              </div>
+              <div class="hero-feature-mini">
+                <div class="hero-feature-mini-icon">💳</div>
+                <div class="hero-feature-mini-text">
+                  <div class="hero-feature-mini-name">Razorpay Payments</div>
+                  <div class="hero-feature-mini-desc">Secure & instant transactions</div>
+                </div>
+                <div class="hero-feature-mini-badge">Secure</div>
+              </div>
+              <div class="hero-feature-mini">
+                <div class="hero-feature-mini-icon">💬</div>
+                <div class="hero-feature-mini-text">
+                  <div class="hero-feature-mini-name">Real-Time Chat</div>
+                  <div class="hero-feature-mini-desc">Connect with buyers & sellers</div>
+                </div>
+                <div class="hero-feature-mini-badge">Socket.IO</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="features-section">
+      <div class="container">
+        <div class="section-header">
+          <div class="section-label">🚀 Core Features</div>
+          <h2>Everything you need to grow</h2>
+          <p>A complete agricultural platform designed to help Indian farmers thrive in the digital economy.</p>
+        </div>
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">🌱</div>
+            <h3>Intelligent Crop Advisor</h3>
+            <p>Enter your soil type, temperature, humidity & rainfall. Our JS-based engine recommends top crops with confidence scores.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🏪</div>
+            <h3>Digital Marketplace</h3>
+            <p>Farmers list crops, buyers discover and purchase directly. Real-time inventory, location-based filtering and categories.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🛒</div>
+            <h3>Cart & Checkout</h3>
+            <p>Add multiple items to cart, adjust quantities, review order summary, and complete secure checkout in minutes.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💳</div>
+            <h3>Razorpay Payments</h3>
+            <p>Integrated with India's leading payment gateway. Supports UPI, cards, netbanking, and wallets. Full verification flow.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>Real-Time Chat</h3>
+            <p>Socket.IO-powered instant messaging between buyers and sellers. Messages stored in MongoDB for history.</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">🔒</div>
+            <h3>Secure Authentication</h3>
+            <p>JWT tokens, bcrypt password hashing, and protected routes. Your data is always safe and private.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="cta-section">
+      <div class="container">
+        <div class="cta-card">
+          <div class="cta-content">
+            <h2>Ready to grow your farm business?</h2>
+            <p>Join thousands of farmers already using Kisaan Sathi to sell their products and get expert crop advice.</p>
+            <div class="cta-actions">
+              <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')">🌱 Start for Free</button>
+              <button class="btn btn-secondary btn-lg" onclick="showSection('marketplace')">Explore Marketplace →</button>
+            </div>
+          </div>
+          <div class="cta-emoji">🌾</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ MARKETPLACE SECTION ══════════════════════ -->
+  <section id="section-marketplace" class="section">
+    <div class="container">
+      <div class="marketplace-header">
+        <div class="marketplace-title">
+          <h2>🏪 Crop Marketplace</h2>
+          <p>Fresh produce directly from Indian farmers</p>
+        </div>
+        <div id="marketplace-farmer-add" style="display:none">
+          <button class="btn btn-primary" onclick="showSection('dashboard')">+ List Your Crop</button>
+        </div>
+      </div>
+
+      <div class="search-bar">
+        <input type="text" id="marketplace-search" placeholder="🔍 Search crops, vegetables, fruits..." oninput="debounceSearch()" />
+        <button class="btn btn-primary" onclick="loadMarketplace()">Search</button>
+      </div>
+
+      <div class="marketplace-filters" id="category-filters">
+        <button class="filter-pill active" data-cat="all" onclick="filterByCategory('all', this)">🌾 All</button>
+        <button class="filter-pill" data-cat="grain" onclick="filterByCategory('grain', this)">🌾 Grains</button>
+        <button class="filter-pill" data-cat="vegetable" onclick="filterByCategory('vegetable', this)">🥦 Vegetables</button>
+        <button class="filter-pill" data-cat="fruit" onclick="filterByCategory('fruit', this)">🍎 Fruits</button>
+        <button class="filter-pill" data-cat="pulse" onclick="filterByCategory('pulse', this)">🫘 Pulses</button>
+        <button class="filter-pill" data-cat="oilseed" onclick="filterByCategory('oilseed', this)">🌻 Oilseeds</button>
+        <button class="filter-pill" data-cat="spice" onclick="filterByCategory('spice', this)">🌶️ Spices</button>
+        <button class="filter-pill" data-cat="other" onclick="filterByCategory('other', this)">📦 Other</button>
+      </div>
+
+      <div id="products-grid" class="products-grid">
+        <!-- Products loaded by JS -->
+        <div class="loading-cards">
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+          <div class="skeleton-card"></div>
+        </div>
+      </div>
+
+      <div id="load-more-wrap" style="text-align:center; padding:24px 0; display:none">
+        <button class="btn btn-secondary" onclick="loadMoreProducts()">Load More Products</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ CROP ADVISOR SECTION ══════════════════════ -->
+  <section id="section-crop" class="section">
+    <div class="container">
+      <div class="crop-header">
+        <div class="section-label">🌱 AI-Powered</div>
+        <h2>Crop Recommendation Advisor</h2>
+        <p>Enter your field conditions and get personalised crop suggestions with confidence scores — powered by our intelligent rule-based engine.</p>
+      </div>
+
+      <div class="crop-container">
+        <!-- Form -->
+        <div class="crop-form-card">
+          <h3>📊 Your Field Conditions</h3>
+          <form id="crop-form" onsubmit="getCropRecommendation(event)">
+            <div class="form-group">
+              <label for="soil-type">Soil Type</label>
+              <select id="soil-type" required>
+                <option value="">Select your soil type...</option>
+                <option value="clay">Clay – Dark, heavy, holds water well</option>
+                <option value="loam">Loam – Balanced, fertile, most crops</option>
+                <option value="sandy">Sandy – Light, drains fast, warm</option>
+                <option value="silt">Silt – Smooth, moderate fertility</option>
+                <option value="black">Black (Regur) – Rich in minerals, cotton</option>
+                <option value="red">Red (Laterite) – Acidic, iron-rich</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Temperature: <span class="slider-badge" id="temp-val">25°C</span></label>
+              <div class="slider-wrap">
+                <input type="range" id="temperature" min="5" max="50" value="25" step="1"
+                  oninput="document.getElementById('temp-val').textContent = this.value + '°C'" />
+                <div class="slider-labels"><span>5°C</span><span>50°C</span></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Humidity: <span class="slider-badge" id="hum-val">60%</span></label>
+              <div class="slider-wrap">
+                <input type="range" id="humidity" min="10" max="100" value="60" step="1"
+                  oninput="document.getElementById('hum-val').textContent = this.value + '%'" />
+                <div class="slider-labels"><span>10%</span><span>100%</span></div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Annual Rainfall: <span class="slider-badge" id="rain-val">150 mm</span></label>
+              <div class="slider-wrap">
+                <input type="range" id="rainfall" min="20" max="500" value="150" step="5"
+                  oninput="document.getElementById('rain-val').textContent = this.value + ' mm'" />
+                <div class="slider-labels"><span>20 mm</span><span>500 mm</span></div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="crop-submit-btn">
+              🔍 Get Recommendations
+            </button>
+          </form>
+        </div>
+
+        <!-- Results -->
+        <div id="crop-results-area">
+          <div class="crop-placeholder">
+            <div class="crop-placeholder-icon">🌾</div>
+            <h3>Your recommendations will appear here</h3>
+            <p>Fill in your field conditions and click "Get Recommendations" to see the best crops for your land.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ DASHBOARD SECTION ══════════════════════ -->
+  <section id="section-dashboard" class="section">
+    <div class="container">
+      <div class="dashboard-header">
+        <h2>📊 Farmer Dashboard</h2>
+        <p id="dashboard-welcome">Manage your listings and track your business.</p>
+      </div>
+
+      <!-- Stats Row -->
+      <div class="stat-cards" id="dashboard-stats">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-products">0</div>
+          <div class="stat-label">Active Listings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-totalqty">0</div>
+          <div class="stat-label">Total Quantity (kg)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-revenue">₹0</div>
+          <div class="stat-label">Potential Revenue</div>
+        </div>
+      </div>
+
+      <div class="dashboard-grid">
+        <!-- Add Product Form -->
+        <div class="dashboard-card">
+          <h3>➕ List New Crop</h3>
+          <form id="add-product-form" onsubmit="addProduct(event)">
+            <div class="form-group">
+              <label for="p-name">Crop Name *</label>
+              <input type="text" id="p-name" placeholder="e.g., Basmati Rice" required />
+            </div>
+            <div class="form-group">
+              <label for="p-desc">Description</label>
+              <textarea id="p-desc" placeholder="Brief description of your crop..." rows="2"></textarea>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="p-price">Price (₹) *</label>
+                <input type="number" id="p-price" placeholder="per unit" required min="1" step="0.01" />
+              </div>
+              <div class="form-group">
+                <label for="p-qty">Quantity *</label>
+                <input type="number" id="p-qty" placeholder="available" required min="1" />
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="p-unit">Unit</label>
+                <select id="p-unit">
+                  <option value="kg">kg</option>
+                  <option value="quintal">quintal</option>
+                  <option value="ton">ton</option>
+                  <option value="piece">piece</option>
+                  <option value="dozen">dozen</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="p-category">Category *</label>
+                <select id="p-category">
+                  <option value="grain">Grain</option>
+                  <option value="vegetable">Vegetable</option>
+                  <option value="fruit">Fruit</option>
+                  <option value="pulse">Pulse</option>
+                  <option value="oilseed">Oilseed</option>
+                  <option value="spice">Spice</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="p-location">Location *</label>
+                <input type="text" id="p-location" placeholder="City / Village" required />
+              </div>
+              <div class="form-group">
+                <label for="p-emoji">Emoji Icon</label>
+                <input type="text" id="p-emoji" placeholder="🌾" maxlength="4" value="🌾" />
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary btn-full" id="add-product-btn">
+              <span class="btn-text">List My Crop</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- My Listings -->
+        <div class="dashboard-card">
+          <h3>📦 My Listings</h3>
+          <div id="my-products-list">
+            <div class="empty-state">
+              <div class="empty-state-icon">📭</div>
+              <p>No listings yet. Add your first crop!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ CART SECTION ══════════════════════ -->
+  <section id="section-cart" class="section">
+    <div class="container">
+      <div class="cart-container" id="cart-layout">
+        <!-- Cart Items -->
+        <div class="cart-items-panel">
+          <div class="cart-header-row">
+            <h2>🛒 Shopping Cart</h2>
+            <button class="btn btn-danger btn-sm" onclick="clearCart()" id="clear-cart-btn">Clear All</button>
+          </div>
+          <div id="cart-items-list">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Cart Summary -->
+        <div class="cart-summary" id="cart-summary-panel">
+          <h3>Order Summary</h3>
+          <div class="summary-row"><span>Subtotal</span><span id="cart-subtotal">₹0.00</span></div>
+          <div class="summary-row"><span>Delivery</span><span class="badge badge-green">FREE</span></div>
+          <div class="summary-row"><span>GST (5%)</span><span id="cart-gst">₹0.00</span></div>
+          <div class="divider"></div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span class="summary-total-price" id="cart-total">₹0.00</span>
+          </div>
+          <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="proceedToCheckout()">
+            💳 Proceed to Checkout
+          </button>
+          <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showSection('marketplace')">
+            ← Continue Shopping
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ CHECKOUT SECTION ══════════════════════ -->
+  <section id="section-checkout" class="section">
+    <div class="container">
+      <div class="checkout-container">
+        <!-- Checkout Form -->
+        <div class="checkout-form">
+          <h2>💳 Checkout</h2>
+
+          <div class="checkout-step">
+            <h3><span class="step-num">1</span> Delivery Address</h3>
+            <div class="form-group">
+              <label for="checkout-name">Full Name</label>
+              <input type="text" id="checkout-name" placeholder="Receiver's full name" required />
+            </div>
+            <div class="form-group">
+              <label for="checkout-phone">Phone Number</label>
+              <input type="tel" id="checkout-phone" placeholder="+91 XXXXXXXXXX" required />
+            </div>
+            <div class="form-group">
+              <label for="checkout-address">Full Address</label>
+              <textarea id="checkout-address" placeholder="House No, Street, Village/City, District, State, PIN" rows="3" required></textarea>
+            </div>
+          </div>
+
+          <div class="checkout-step">
+            <h3><span class="step-num">2</span> Order Review</h3>
+            <div id="checkout-items-review">
+              <!-- Rendered by JS -->
+            </div>
+          </div>
+
+          <div class="checkout-step">
+            <h3><span class="step-num">3</span> Payment</h3>
+            <div class="payment-options">
+              <div class="payment-option selected">
+                <span>💳</span> Razorpay (UPI, Cards, Netbanking, Wallets)
+                <span class="badge badge-green">Secure</span>
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-full btn-lg" onclick="initiatePayment()" id="pay-btn">
+            🔒 Pay Securely with Razorpay
+          </button>
+          <p style="text-align:center; font-size:0.8rem; color:var(--c-text-dim); margin-top:12px">
+            🔐 Payments secured by Razorpay. Your data is encrypted and safe.
+          </p>
+        </div>
+
+        <!-- Checkout Summary -->
+        <div class="cart-summary" id="checkout-summary">
+          <h3>📋 Order Summary</h3>
+          <div id="checkout-summary-items"></div>
+          <div class="divider"></div>
+          <div class="summary-row"><span>Subtotal</span><span id="co-subtotal">₹0.00</span></div>
+          <div class="summary-row"><span>GST (5%)</span><span id="co-gst">₹0.00</span></div>
+          <div class="summary-row"><span>Delivery</span><span class="badge badge-green">FREE</span></div>
+          <div class="divider"></div>
+          <div class="summary-total">
+            <span>Total</span>
+            <span class="summary-total-price" id="co-total">₹0.00</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ ORDERS SECTION ══════════════════════ -->
+  <section id="section-orders" class="section">
+    <div class="container">
+      <div class="orders-header">
+        <h2>📦 My Orders</h2>
+        <p>Track all your purchases and order statuses.</p>
+      </div>
+      <div id="orders-list">
+        <div class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <h3>No orders yet</h3>
+          <p>You haven't placed any orders. Start shopping in the marketplace!</p>
+          <button class="btn btn-primary" onclick="showSection('marketplace')">Browse Marketplace</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════ CHAT SECTION ══════════════════════ -->
+  <section id="section-chat" class="section">
+    <div class="container">
+      <div class="chat-container" id="chat-layout">
+        <!-- Sidebar: User List -->
+        <div class="chat-sidebar">
+          <div class="chat-sidebar-header">
+            <h3>💬 Messages</h3>
+            <p style="font-size:0.8rem; color:var(--c-text-muted)">Chat with farmers & buyers</p>
+          </div>
+          <div class="chat-users-list" id="chat-users-list">
+            <div style="padding:24px; text-align:center; color:var(--c-text-muted)">
+              <div style="font-size:2rem">👥</div>
+              <p style="font-size:0.85rem">Loading users...</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Main Area -->
+        <div class="chat-main" id="chat-main">
+          <div class="chat-placeholder" id="chat-placeholder">
+            <div class="chat-placeholder-icon">💬</div>
+            <h3>Select a conversation</h3>
+            <p>Choose a user from the left to start chatting</p>
+          </div>
+
+          <!-- Active Chat -->
+          <div id="chat-active" style="display:none; flex-direction:column; flex:1">
+            <div class="chat-header" id="chat-header">
+              <div class="user-avatar" id="chat-user-avatar">?</div>
+              <div>
+                <div class="user-name" id="chat-user-name">User</div>
+                <div style="font-size:0.75rem; color:var(--c-text-dim)" id="chat-user-status">Online</div>
+              </div>
+            </div>
+            <div class="chat-messages" id="chat-messages"></div>
+            <div class="chat-input-area">
+              <input type="text" id="chat-input" class="chat-input" placeholder="Type a message..." onkeydown="handleChatEnter(event)" />
+              <button class="chat-send-btn" onclick="sendMessage()" title="Send">➤</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ════════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════════ -->
+<script src="/socket.io/socket.io.js" onerror="console.warn('Socket.IO not available – chat may not work in offline mode.')"></script>
+<script src="https://checkout.razorpay.com/v1/checkout.js" onerror="console.warn('Razorpay CDN not loaded.')"></script>
+
+<script src="js/config.js"></script>
+<script src="js/toast.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/marketplace.js"></script>
+<script src="js/cart.js"></script>
+<script src="js/checkout.js"></script>
+<script src="js/dashboard.js"></script>
+<script src="js/crop.js"></script>
+<script src="js/chat.js"></script>
+<script src="js/app.js"></script>
+
+</body>
+</html>
