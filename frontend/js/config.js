@@ -1,7 +1,7 @@
 /* ─── Global Config & API Helpers ─────────────────────────────── */
 
-const API_URL    = 'http://localhost:5000/api';
-const SOCKET_URL = 'http://localhost:5000';
+const API_URL    = 'https://kisaan-sathi.onrender.com/api';
+const SOCKET_URL = 'https://kisaan-sathi.onrender.com';
 
 /* ─── Global App State ────────────────────────────────────────── */
 window.KS = {
