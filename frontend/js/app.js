@@ -1,3 +1,4 @@
+const BASE_URL = "https://kisaan-sathi.onrender.com";
 /* ─── Main App Controller ─────────────────────────────────────── */
 
 /* ─── Navigation ────────────────────────────────────────────────── */
@@ -90,3 +91,29 @@ document.addEventListener('keydown', (e) => {
     document.getElementById('nav-links')?.classList.remove('open');
   }
 });
+
+/* ─── Backend Connection Test ───────────────────────── */
+
+async function testLoginConnection() {
+  try {
+    const res = await fetch(`${BASE_URL}/api/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        email: "test@gmail.com",
+        password: "123456"
+      })
+    });
+
+    const data = await res.json();
+    console.log("Backend Response:", data);
+
+  } catch (err) {
+    console.error("Connection Error:", err);
+  }
+}
+
+// Run once to test connection
+testLoginConnection();
