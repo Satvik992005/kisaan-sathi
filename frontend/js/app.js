@@ -1,4 +1,4 @@
-const BASE_URL = "https://kisaan-sathi.onrender.com";
+const BASE_URL = "";
 /* ─── Main App Controller ─────────────────────────────────────── */
 
 /* ─── Navigation ────────────────────────────────────────────────── */
@@ -68,6 +68,15 @@ document.addEventListener('DOMContentLoaded', () => {
       KS.token = storedToken;
       KS.user  = JSON.parse(storedUser);
       setAuthState(KS.user);
+      
+      // Validate token silently
+      apiRequest('/auth/me').then(data => {
+        if (!data.success) {
+          console.warn('Token validation failed. Clearing local storage.');
+          if (typeof logout === 'function') logout();
+        }
+      });
+      
     } catch {
       localStorage.removeItem('ks_token');
       localStorage.removeItem('ks_user');
@@ -116,8 +125,8 @@ async function testRegister() {
   }
 }
 
-// Run once
-testRegister();
+// Run once - disabled for production
+// testRegister();
 
 /* ─── Backend Connection Test ───────────────────────── */
 
@@ -142,8 +151,8 @@ async function testLoginConnection() {
   }
 }
 
-// Run once to test connection
-testLoginConnection();
+// Run once to test connection - disabled for production
+// testLoginConnection();
 
 
 async function login() {
@@ -151,7 +160,7 @@ async function login() {
   const password = document.getElementById("login-password").value;
 
   try {
-    const res = await fetch("https://kisaan-sathi.onrender.com/api/auth/login", {
+    const res = await fetch("/api/auth/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

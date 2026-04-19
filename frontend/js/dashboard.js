@@ -9,6 +9,9 @@ async function loadDashboard() {
   const data = await apiRequest('/products/my/listings');
   if (!data.success) { toast.error('Error', data.message); return; }
 
+  // Advanced Feature: Real-time Weather Forecast Simulation
+  renderWeatherWidget();
+
   const products = data.products || [];
 
   // Stats
@@ -101,26 +104,78 @@ async function loadOrders() {
     return;
   }
 
-  const statusColor = { placed:'badge-blue', processing:'badge-gold', shipped:'badge-gold', delivered:'badge-green', cancelled:'badge-red', pending:'badge-blue', completed:'badge-green', failed:'badge-red' };
+  const statusMap = {
+    'placed': 1, 'processing': 2, 'shipped': 3, 'delivered': 4
+  };
 
-  listEl.innerHTML = `<div class="orders-list">${data.orders.map(o => `
+  listEl.innerHTML = `<div class="orders-list">${data.orders.map(o => {
+    const currentStep = statusMap[o.status] || 1;
+    return `
     <div class="order-card">
       <div class="order-header">
         <div>
           <div class="order-id">Order #${o._id.slice(-8).toUpperCase()}</div>
           <div class="order-date">📅 ${formatDate(o.createdAt)}</div>
         </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <span class="badge ${statusColor[o.status] || 'badge-blue'}">${o.status}</span>
-          <span class="badge ${statusColor[o.paymentStatus] || 'badge-blue'}">${o.paymentStatus}</span>
+        <div><span class="badge ${o.paymentStatus === 'completed' ? 'badge-green' : 'badge-gold'}">💸 Payment: ${o.paymentStatus}</span></div>
+      </div>
+      
+      <!-- Interactive Order Timeline -->
+      <div class="order-timeline">
+        <div class="timeline-step ${currentStep >= 1 ? (currentStep > 1 ? 'completed' : 'active') : ''}">
+          <div class="timeline-icon"><i class="ph ph-shopping-bag"></i></div>
+          <div class="timeline-label">Placed</div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="timeline-step ${currentStep >= 2 ? (currentStep > 2 ? 'completed' : 'active') : ''}">
+          <div class="timeline-icon"><i class="ph ph-package"></i></div>
+          <div class="timeline-label">Processing</div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="timeline-step ${currentStep >= 3 ? (currentStep > 3 ? 'completed' : 'active') : ''}">
+          <div class="timeline-icon"><i class="ph ph-truck"></i></div>
+          <div class="timeline-label">Shipped</div>
+          <div class="timeline-line"></div>
+        </div>
+        <div class="timeline-step ${currentStep >= 4 ? 'completed' : ''}">
+          <div class="timeline-icon"><i class="ph ph-check-circle"></i></div>
+          <div class="timeline-label">Delivered</div>
         </div>
       </div>
-      <div class="order-items">
-        ${o.products.map(p => `<span class="order-item-tag">${p.emoji || '🌾'} ${escHtml(p.name)} ×${p.quantity}</span>`).join('')}
+
+      <div class="order-items" style="margin-top:20px;">
+        ${o.products.map(p => `<span class="order-item-tag">${p.emoji || '🌾'} ${escHtml(p.name)} × ${p.quantity}</span>`).join('')}
       </div>
       <div class="order-footer">
         <div style="font-size:0.83rem;color:var(--c-text-muted)">🏠 ${escHtml(o.shippingAddress || 'N/A')}</div>
         <div class="order-total">${formatINR(o.totalAmount)}</div>
       </div>
-    </div>`).join('')}</div>`;
+    </div>`}).join('')}</div>`;
+}
+
+/* ─── Weather Predictor Feature ────────────────────────────────── */
+function renderWeatherWidget() {
+  const container = document.getElementById('weather-widget-container');
+  if (!container) return;
+
+  const weathers = [
+    { temp: '28°C', icon: 'ph-sun-dim', cond: 'Sunny & Clear', desc: 'Perfect conditions for harvesting wheat.' },
+    { temp: '24°C', icon: 'ph-cloud-rain', cond: 'Light Rain', desc: 'Good time to sow seasonal vegetables.' },
+    { temp: '31°C', icon: 'ph-thermometer-hot', cond: 'Hot', desc: 'Ensure ample irrigation for your crops.' }
+  ];
+  // Stable random per user session
+  const w = weathers[KS.user.name.length % 3];
+
+  container.innerHTML = `
+    <div class="weather-widget">
+      <div class="weather-info">
+        <h3><i class="ph ph-map-pin"></i> ${KS.user.location || 'Local Farm'} Forecast</h3>
+        <p>${w.cond} • ${w.desc}</p>
+      </div>
+      <div class="weather-icon-box">
+        <div class="weather-temp">${w.temp}</div>
+        <div class="weather-icon"><i class="ph ${w.icon}"></i></div>
+      </div>
+    </div>
+  `;
 }

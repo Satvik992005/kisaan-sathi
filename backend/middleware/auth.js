@@ -13,6 +13,7 @@ const authMiddleware = (req, res, next) => {
     req.user = decoded;
     next();
   } catch (error) {
+    console.error('JWT Verification Failed:', error.message, 'Token received:', token);
     return res.status(401).json({ success: false, message: 'Invalid or expired token.' });
   }
 };

@@ -2,6 +2,14 @@
 
 async function getCropRecommendation(e) {
   e.preventDefault();
+  
+  // Enforce login for this feature
+  if (!KS.user) {
+    if (typeof openAuthModal === 'function') openAuthModal('login');
+    if (typeof toast !== 'undefined') toast.info('Login Required', 'Please login or sign up to use the Crop Adviser.');
+    return;
+  }
+  
   const btn = document.getElementById('crop-submit-btn');
   btn.disabled = true; btn.textContent = '🔍 Analyzing…';
 

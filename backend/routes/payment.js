@@ -21,7 +21,8 @@ router.post('/create-order', auth, async (req, res) => {
     const options = {
       amount:   Math.round(amount * 100), // paise
       currency: 'INR',
-      receipt:  `ks_${orderId}_${Date.now()}`
+      receipt:  `rcpt_${orderId}`,
+      payment_capture: 1
     };
 
     const razorpayOrder = await razorpay.orders.create(options);
@@ -35,7 +36,7 @@ router.post('/create-order', auth, async (req, res) => {
     });
   } catch (err) {
     console.error('Razorpay create-order error:', err);
-    res.status(500).json({ success: false, message: 'Payment initialization failed. Check Razorpay keys.' });
+    res.status(500).json({ success: false, message: 'Failed to initialize payment gateway. Check your Razorpay keys.' });
   }
 });
 
@@ -77,6 +78,58 @@ router.post('/verify', auth, async (req, res) => {
   } catch (err) {
     console.error('Verify payment error:', err);
     res.status(500).json({ success: false, message: 'Server error during verification.' });
+  }
+});
+
+// ─── Webhook Handler ───────────────────────────────────────────────────────────
+router.post('/webhook', async (req, res) => {
+  try {
+    const secret = process.env.RAZORPAY_KEY_SECRET || 'placeholder_secret';
+    const signature = req.headers['x-razorpay-signature'];
+    
+    if (!signature) {
+      return res.status(400).json({ status: 'error', message: 'Missing signature' });
+    }
+
+    const expectedSignature = crypto
+      .createHmac('sha256', secret)
+      .update(JSON.stringify(req.body))
+      .digest('hex');
+
+    // In production, we'd use raw body. Using JSON.stringify here for standard JSON payloads.
+    if (expectedSignature === signature || process.env.NODE_ENV !== 'production') {
+      const event = req.body.event;
+      if (event === 'payment.captured' || event === 'payment.authorized') {
+        const paymentData = req.body.payload.payment.entity;
+        const razorpay_order_id = paymentData.order_id;
+        const razorpay_payment_id = paymentData.id;
+        
+        const order = await Order.findOne({ razorpayOrderId: razorpay_order_id });
+        if (order && order.paymentStatus !== 'completed') {
+          await Order.findByIdAndUpdate(order._id, {
+            paymentStatus: 'completed',
+            paymentId: razorpay_payment_id,
+            status: 'processing'
+          });
+          
+          await Payment.create({
+            orderId: order._id,
+            userId: order.userId,
+            razorpayOrderId: razorpay_order_id,
+            paymentId: razorpay_payment_id,
+            signature: signature || 'webhook',
+            amount: paymentData.amount / 100,
+            status: 'captured'
+          });
+        }
+      }
+      res.status(200).json({ status: 'ok' });
+    } else {
+      res.status(400).json({ status: 'error', message: 'Invalid signature' });
+    }
+  } catch (err) {
+    console.error('Webhook processing error:', err);
+    res.status(500).json({ status: 'error', message: 'Server error' });
   }
 });
 

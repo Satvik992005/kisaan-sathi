@@ -7,6 +7,7 @@
   <meta name="description" content="Kisaan Sathi empowers Indian farmers with intelligent crop guidance, digital marketplace, and real-time communication. Buy and sell crops online with secure Razorpay payments." />
   <meta name="keywords" content="kisaan sathi, agriculture, crop recommendation, farm marketplace, buy crops online" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <script src="https://unpkg.com/@phosphor-icons/web"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
 </head>
@@ -23,7 +24,7 @@
 <div id="loader" class="loader-overlay">
   <div class="loader-box">
     <div class="loader-ring"></div>
-    <div class="loader-logo">🌾</div>
+    <div class="loader-logo"><i class="ph ph-plant"></i></div>
   </div>
 </div>
 
@@ -42,7 +43,7 @@
     <!-- Login Form -->
     <form id="login-form" onsubmit="handleLogin(event)">
       <div class="auth-header">
-        <div class="auth-icon">🌿</div>
+        <div class="auth-icon"><i class="ph ph-leaf"></i></div>
         <h2>Welcome Back!</h2>
         <p>Login to continue to Kisaan Sathi</p>
       </div>
@@ -52,7 +53,10 @@
       </div>
       <div class="form-group">
         <label for="login-password">Password</label>
-        <input type="password" id="login-password" placeholder="Your password" required autocomplete="current-password" />
+        <div style="position: relative;">
+          <input type="password" id="login-password" placeholder="Your password" required autocomplete="current-password" style="padding-right: 60px;" />
+          <button type="button" onclick="togglePassword('login-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.85rem; color: var(--c-primary); cursor: pointer; padding: 4px;">Show</button>
+        </div>
       </div>
       <button type="submit" class="btn btn-primary btn-full" id="login-submit-btn">
         <span class="btn-text">Login</span>
@@ -64,7 +68,7 @@
     <!-- Register Form -->
     <form id="register-form" style="display:none" onsubmit="handleRegister(event)">
       <div class="auth-header">
-        <div class="auth-icon">🌱</div>
+        <div class="auth-icon"><i class="ph ph-seedling"></i></div>
         <h2>Join Kisaan Sathi</h2>
         <p>Create your account to get started</p>
       </div>
@@ -77,14 +81,23 @@
         <input type="email" id="reg-email" placeholder="your@email.com" required autocomplete="email" />
       </div>
       <div class="form-group">
-        <label for="reg-password">Password * (min 6 chars)</label>
-        <input type="password" id="reg-password" placeholder="Create a strong password" required minlength="6" autocomplete="new-password" />
+        <label for="reg-password">Password * <span style="font-size: 0.8rem; color: var(--c-text-muted);">(Minimum 6 characters)</span></label>
+        <div style="position: relative;">
+          <input type="password" id="reg-password" placeholder="Create a strong password" required minlength="6" autocomplete="new-password" oninput="checkPasswordStrength(this.value)" style="padding-right: 60px;" />
+          <button type="button" onclick="togglePassword('reg-password', this)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; font-size: 0.85rem; color: var(--c-primary); cursor: pointer; padding: 4px;">Show</button>
+        </div>
+        <div id="pwd-strength-container" style="display: none; margin-top: 8px;">
+          <div style="height: 4px; background: #e5e7eb; border-radius: 2px; overflow: hidden;">
+            <div id="pwd-strength-bar" style="height: 100%; width: 0%; transition: all 0.3s ease;"></div>
+          </div>
+          <div id="pwd-strength-text" style="font-size: 0.75rem; margin-top: 4px; color: var(--c-text-dim);"></div>
+        </div>
       </div>
       <div class="form-group">
         <label for="reg-role">I am a</label>
         <select id="reg-role">
-          <option value="buyer">🛒 Buyer – Purchase crops</option>
-          <option value="farmer">🌾 Farmer – Sell my crops</option>
+          <option value="buyer"><i class="ph ph-shopping-cart"></i> Buyer – Purchase crops</option>
+          <option value="farmer"><i class="ph ph-plant"></i> Farmer – Sell my crops</option>
         </select>
       </div>
       <div class="form-row">
@@ -107,11 +120,19 @@
 </div>
 
 <!-- ════════════════════════════════════════════════
+     ANNOUNCEMENT BANNER
+════════════════════════════════════════════════ -->
+<div id="promo-banner" style="background: linear-gradient(90deg, #10b981, #059669); color: white; text-align: center; padding: 8px 16px; font-size: 0.85rem; font-weight: 500; display: flex; justify-content: center; align-items: center; gap: 10px; position: relative; z-index: 1000;">
+  <span>🎉 <strong>Special Offer:</strong> Flat 10% Cashback on all bulk agricultural orders via Razorpay Checkout!</span>
+  <button style="background: none; border: none; color: white; cursor: pointer; padding: 0 4px; font-size: 1rem; position: absolute; right: 10px;" onclick="this.parentElement.style.display='none'" title="Dismiss">✕</button>
+</div>
+
+<!-- ════════════════════════════════════════════════
      NAVBAR
 ════════════════════════════════════════════════ -->
 <nav class="navbar" id="navbar">
   <div class="nav-brand" onclick="showSection('home')" title="Home">
-    <span class="brand-icon">🌾</span>
+    <span class="brand-icon"><i class="ph ph-plant"></i></span>
     <span class="brand-text">Kisaan<span class="brand-accent">Sathi</span></span>
   </div>
 
@@ -119,17 +140,17 @@
 
   <ul class="nav-links" id="nav-links">
     <li><a class="nav-link active" data-section="home" onclick="showSection('home')">Home</a></li>
-    <li><a class="nav-link" data-section="marketplace" onclick="showSection('marketplace')">🏪 Marketplace</a></li>
-    <li><a class="nav-link" data-section="crop" onclick="showSection('crop')">🌱 Crop Advisor</a></li>
-    <li class="auth-required" style="display:none"><a class="nav-link farmer-only" data-section="dashboard" onclick="showSection('dashboard')">📊 Dashboard</a></li>
-    <li class="auth-required" style="display:none"><a class="nav-link" data-section="orders" onclick="showSection('orders')">📦 My Orders</a></li>
-    <li class="auth-required" style="display:none"><a class="nav-link" data-section="chat" onclick="showSection('chat')">💬 Chat</a></li>
+    <li><a class="nav-link" data-section="marketplace" onclick="showSection('marketplace')"><i class="ph ph-storefront"></i> Marketplace</a></li>
+    <li><a class="nav-link" data-section="crop" onclick="showSection('crop')"><i class="ph ph-seedling"></i> Crop Advisor</a></li>
+    <li class="auth-required" style="display:none"><a class="nav-link farmer-only" data-section="dashboard" onclick="showSection('dashboard')"><i class="ph ph-chart-bar"></i> Dashboard</a></li>
+    <li class="auth-required" style="display:none"><a class="nav-link" data-section="orders" onclick="showSection('orders')"><i class="ph ph-package"></i> My Orders</a></li>
+    <li class="auth-required" style="display:none"><a class="nav-link" data-section="chat" onclick="showSection('chat')"><i class="ph ph-chats"></i> Chat</a></li>
   </ul>
 
   <div class="nav-actions">
     <!-- Cart Button -->
     <button class="cart-btn auth-required" id="cart-nav-btn" onclick="showSection('cart')" style="display:none" title="Cart">
-      🛒 <span class="cart-badge" id="cart-count">0</span>
+      <i class="ph ph-shopping-cart"></i> <span class="cart-badge" id="cart-count">0</span>
     </button>
 
     <!-- Guest Actions -->
@@ -157,22 +178,24 @@
 
   <!-- ══════════════════════ HOME SECTION ══════════════════════ -->
   <section id="section-home" class="section active">
-    <!-- Hero -->
+    <!-- GUEST VIEW -->
+    <div id="guest-home-view">
+      <!-- Hero -->
     <div class="hero">
       <div class="hero-bg"></div>
       <div class="hero-content container">
         <div class="hero-left">
           <div class="hero-badge">🇮🇳 Made for Indian Farmers</div>
           <h1 class="hero-title">
-            Smart Farming<br/>
+            Modern Farming<br/>
             <span class="highlight">Starts Here</span>
           </h1>
           <p class="hero-desc">
-            Kisaan Sathi empowers farmers with AI-powered crop guidance, a digital marketplace, and real-time buyer–seller communication — all in one platform.
+            Kisaan Sathi empowers farmers with precision crop guidance, a digital marketplace, and real-time buyer–seller communication — all in one platform.
           </p>
           <div class="hero-actions">
-            <button class="btn btn-primary btn-lg" onclick="showSection('marketplace')">🏪 Browse Marketplace</button>
-            <button class="btn btn-secondary btn-lg" onclick="showSection('crop')">🌱 Crop Advisor</button>
+            <button class="btn btn-primary btn-lg" onclick="showSection('marketplace')"><i class="ph ph-storefront"></i> Browse Marketplace</button>
+            <button class="btn btn-secondary btn-lg" onclick="showSection('crop')"><i class="ph ph-seedling"></i> Crop Advisor</button>
           </div>
           <div class="hero-stats">
             <div class="hero-stat">
@@ -191,11 +214,11 @@
         </div>
         <div class="hero-right">
           <div class="hero-card">
-            <div class="hero-card-title">✨ Platform Features</div>
+            <div class="hero-card-title"><i class="ph ph-sparkle"></i> Platform Features</div>
             <div class="hero-card-main">Everything a farmer needs</div>
             <div class="hero-features-mini">
               <div class="hero-feature-mini">
-                <div class="hero-feature-mini-icon">🌱</div>
+                <div class="hero-feature-mini-icon"><i class="ph ph-seedling"></i></div>
                 <div class="hero-feature-mini-text">
                   <div class="hero-feature-mini-name">Crop Recommendation</div>
                   <div class="hero-feature-mini-desc">Based on soil, weather & climate</div>
@@ -203,7 +226,7 @@
                 <div class="hero-feature-mini-badge">AI</div>
               </div>
               <div class="hero-feature-mini">
-                <div class="hero-feature-mini-icon">🛒</div>
+                <div class="hero-feature-mini-icon"><i class="ph ph-shopping-cart"></i></div>
                 <div class="hero-feature-mini-text">
                   <div class="hero-feature-mini-name">Digital Marketplace</div>
                   <div class="hero-feature-mini-desc">List & sell your crops online</div>
@@ -211,7 +234,7 @@
                 <div class="hero-feature-mini-badge">Live</div>
               </div>
               <div class="hero-feature-mini">
-                <div class="hero-feature-mini-icon">💳</div>
+                <div class="hero-feature-mini-icon"><i class="ph ph-credit-card"></i></div>
                 <div class="hero-feature-mini-text">
                   <div class="hero-feature-mini-name">Razorpay Payments</div>
                   <div class="hero-feature-mini-desc">Secure & instant transactions</div>
@@ -219,7 +242,7 @@
                 <div class="hero-feature-mini-badge">Secure</div>
               </div>
               <div class="hero-feature-mini">
-                <div class="hero-feature-mini-icon">💬</div>
+                <div class="hero-feature-mini-icon"><i class="ph ph-chats"></i></div>
                 <div class="hero-feature-mini-text">
                   <div class="hero-feature-mini-name">Real-Time Chat</div>
                   <div class="hero-feature-mini-desc">Connect with buyers & sellers</div>
@@ -242,32 +265,32 @@
         </div>
         <div class="features-grid">
           <div class="feature-card">
-            <div class="feature-icon">🌱</div>
-            <h3>Intelligent Crop Advisor</h3>
-            <p>Enter your soil type, temperature, humidity & rainfall. Our JS-based engine recommends top crops with confidence scores.</p>
+            <div class="feature-icon"><i class="ph ph-seedling"></i></div>
+            <h3>Crop Advisor</h3>
+            <p>Enter your soil type, temperature, humidity & rainfall. Our engine recommends top crops with confidence scores.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🏪</div>
+            <div class="feature-icon"><i class="ph ph-storefront"></i></div>
             <h3>Digital Marketplace</h3>
             <p>Farmers list crops, buyers discover and purchase directly. Real-time inventory, location-based filtering and categories.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🛒</div>
+            <div class="feature-icon"><i class="ph ph-shopping-cart"></i></div>
             <h3>Cart & Checkout</h3>
             <p>Add multiple items to cart, adjust quantities, review order summary, and complete secure checkout in minutes.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">💳</div>
+            <div class="feature-icon"><i class="ph ph-credit-card"></i></div>
             <h3>Razorpay Payments</h3>
             <p>Integrated with India's leading payment gateway. Supports UPI, cards, netbanking, and wallets. Full verification flow.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">💬</div>
+            <div class="feature-icon"><i class="ph ph-chats"></i></div>
             <h3>Real-Time Chat</h3>
             <p>Socket.IO-powered instant messaging between buyers and sellers. Messages stored in MongoDB for history.</p>
           </div>
           <div class="feature-card">
-            <div class="feature-icon">🔒</div>
+            <div class="feature-icon"><i class="ph ph-lock-key"></i></div>
             <h3>Secure Authentication</h3>
             <p>JWT tokens, bcrypt password hashing, and protected routes. Your data is always safe and private.</p>
           </div>
@@ -283,22 +306,192 @@
             <h2>Ready to grow your farm business?</h2>
             <p>Join thousands of farmers already using Kisaan Sathi to sell their products and get expert crop advice.</p>
             <div class="cta-actions">
-              <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')">🌱 Start for Free</button>
+              <button class="btn btn-primary btn-lg" onclick="openAuthModal('register')"><i class="ph ph-seedling"></i> Start for Free</button>
               <button class="btn btn-secondary btn-lg" onclick="showSection('marketplace')">Explore Marketplace →</button>
             </div>
           </div>
-          <div class="cta-emoji">🌾</div>
+          <div class="cta-emoji"><i class="ph ph-plant"></i></div>
         </div>
       </div>
     </div>
+    </div>
+    <!-- END GUEST VIEW -->
+
+    <!-- AUTHENTICATED VIEW -->
+    <div id="auth-home-view" style="display:none; padding-top: 40px; padding-bottom: 60px;">
+      <div class="container">
+        <div style="background: linear-gradient(135deg, var(--c-primary-dark), var(--c-primary)); color: white; padding: 40px; border-radius: 20px; margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 20px; box-shadow: 0 10px 30px rgba(34, 197, 94, 0.2);">
+          <div>
+            <h2 style="font-size: 2.2rem; margin-bottom: 10px;">Welcome back, <span id="auth-home-name">User</span>! 🌾</h2>
+            <p style="font-size: 1.1rem; opacity: 0.9;">Choose an action below to get started.</p>
+          </div>
+          <div style="font-size: 4rem; opacity: 0.2;"><i class="ph ph-sun"></i></div>
+        </div>
+
+        <h3 style="margin-bottom: 20px; font-size: 1.5rem;"><i class="ph ph-lightning"></i> Quick Actions</h3>
+        <div class="features-grid">
+          
+          <div class="feature-card" style="cursor: pointer;" onclick="showSection('marketplace')">
+            <div class="feature-icon"><i class="ph ph-storefront"></i></div>
+            <h3>Enter Marketplace</h3>
+            <p>Browse fresh produce, view live Mandi prices, and check out new farm listings.</p>
+          </div>
+
+          <div class="feature-card" style="cursor: pointer;" onclick="showSection('orders')">
+            <div class="feature-icon"><i class="ph ph-package"></i></div>
+            <h3>My Orders</h3>
+            <p>Track your recent purchases, view delivery statuses, and payment receipts.</p>
+          </div>
+
+          <div class="feature-card" style="cursor: pointer;" onclick="showSection('crop')">
+            <div class="feature-icon"><i class="ph ph-seedling"></i></div>
+            <h3>Crop Advisor Tool</h3>
+            <p>Enter your soil and weather details to get instant ML-based crop recommendations.</p>
+          </div>
+
+          <div class="feature-card" style="cursor: pointer;" onclick="showSection('chat')">
+            <div class="feature-icon"><i class="ph ph-chats"></i></div>
+            <h3>Messages & Chat</h3>
+            <p>Continue your conversations with buyers or farmers securely via Socket.IO.</p>
+          </div>
+
+          <!-- Farmer Only Quick Action -->
+          <div class="feature-card farmer-only" style="cursor: pointer; background: var(--c-surface); border: 2px solid var(--c-primary);" onclick="showSection('dashboard')">
+            <div class="feature-icon" style="background: var(--c-primary); color: white;"><i class="ph ph-plus"></i></div>
+            <h3>Manage Farm Listings</h3>
+            <p>Go to your dashboard to add new crops and track your potential revenue.</p>
+          </div>
+
+        </div>
+
+        <div style="margin-top: 40px;">
+          <h3 style="margin-bottom: 20px; font-size: 1.5rem;"><i class="ph ph-chart-line-up"></i> Daily Insights & Updates</h3>
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
+            
+            <!-- Farming Tip -->
+            <div style="background: var(--c-surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid var(--c-primary);">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: rgba(34, 197, 94, 0.1); color: var(--c-primary); height: 40px; width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                  <i class="ph ph-lightbulb"></i>
+                </div>
+                <h4 style="margin: 0; font-size: 1.1rem;">Tip of the Day</h4>
+              </div>
+              <p style="color: var(--c-text-muted); font-size: 0.95rem; line-height: 1.5;">
+                <strong>Crop Rotation:</strong> Planting legumes like peas or beans this season can naturally restore nitrogen to your soil, reducing the need for chemical fertilizers and keeping the soil fertile for your next major crop!
+              </p>
+            </div>
+
+            <!-- Market Highlights -->
+            <div style="background: var(--c-surface); border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border-left: 4px solid var(--c-gold);">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: rgba(234, 179, 8, 0.1); color: var(--c-gold); height: 40px; width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                  <i class="ph ph-trend-up"></i>
+                </div>
+                <h4 style="margin: 0; font-size: 1.1rem;">Market Highlights</h4>
+              </div>
+              <ul style="list-style: none; padding: 0; margin: 0; font-size: 0.95rem;">
+                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--c-border);"><span style="color:var(--c-text-dim);">Wheat (UP)</span> <strong>+2.1% ▲</strong></li>
+                <li style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--c-border);"><span style="color:var(--c-text-dim);">Onion (Nashik)</span> <strong style="color: var(--c-danger);">-4.2% ▼</strong></li>
+                <li style="display: flex; justify-content: space-between; padding: 8px 0;"><span style="color:var(--c-text-dim);">Tomato (Kolar)</span> <strong>+5.0% ▲</strong></li>
+              </ul>
+              <button class="btn btn-secondary btn-sm" style="margin-top: 16px; width: 100%;" onclick="showSection('marketplace')">View All Mandi Prices</button>
+            </div>
+
+            <!-- Support Banner -->
+            <div style="background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border-radius: 16px; padding: 24px; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);">
+              <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="background: rgba(255, 255, 255, 0.2); color: white; height: 40px; width: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                  <i class="ph ph-headset"></i>
+                </div>
+                <h4 style="margin: 0; font-size: 1.1rem;">Need Help?</h4>
+              </div>
+              <p style="font-size: 0.95rem; line-height: 1.5; opacity: 0.9; margin-bottom: 20px;">
+                Our support team is available 24/7 to help you with crop listings, buyer negotiations, or payment settlements.
+              </p>
+              <button class="btn" style="background: white; color: #2563eb; width: 100%;"><i class="ph ph-phone-call"></i> Contact Support</button>
+            </div>
+
+          </div>
+        </div>
+
+        <div style="margin-top: 60px;">
+          <h3 style="margin-bottom: 20px; font-size: 1.5rem;"><i class="ph ph-magnifying-glass"></i> Explore Top Categories</h3>
+          <div style="display: flex; gap: 16px; overflow-x: auto; padding-bottom: 16px; scrollbar-width: none;">
+            <div style="min-width: 140px; background: var(--c-surface); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onclick="showSection('marketplace')">
+              <div style="font-size: 2.5rem; margin-bottom: 8px;">🌾</div>
+              <div style="font-weight: 500;">Grains</div>
+            </div>
+            <div style="min-width: 140px; background: var(--c-surface); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onclick="showSection('marketplace')">
+              <div style="font-size: 2.5rem; margin-bottom: 8px;">🥕</div>
+              <div style="font-weight: 500;">Vegetables</div>
+            </div>
+            <div style="min-width: 140px; background: var(--c-surface); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onclick="showSection('marketplace')">
+              <div style="font-size: 2.5rem; margin-bottom: 8px;">🍎</div>
+              <div style="font-weight: 500;">Fruits</div>
+            </div>
+            <div style="min-width: 140px; background: var(--c-surface); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onclick="showSection('marketplace')">
+              <div style="font-size: 2.5rem; margin-bottom: 8px;">🧄</div>
+              <div style="font-weight: 500;">Spices</div>
+            </div>
+            <div style="min-width: 140px; background: var(--c-surface); border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.02);" onclick="showSection('marketplace')">
+              <div style="font-size: 2.5rem; margin-bottom: 8px;">🌿</div>
+              <div style="font-weight: 500;">Pulses</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Logged-in Footer -->
+      <footer style="margin-top: 80px; padding: 40px 20px 20px; background: var(--c-bg); border-top: 1px solid var(--c-border); color: var(--c-text-dim);">
+        <div class="container" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 40px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px; font-weight: 800; font-size: 1.2rem; color: var(--c-text); margin-bottom: 16px;">
+              <i class="ph ph-plant" style="color: var(--c-primary);"></i> KisaanSathi
+            </div>
+            <p style="font-size: 0.9rem; line-height: 1.6;">Empowering Indian farmers with precision agriculture, direct market access, and secure payments.</p>
+          </div>
+          <div>
+            <h4 style="color: var(--c-text); margin-bottom: 16px;">Quick Links</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+              <li><a style="cursor: pointer;" onclick="showSection('marketplace')">Marketplace</a></li>
+              <li><a style="cursor: pointer;" onclick="showSection('crop')">Crop Advisor</a></li>
+              <li><a style="cursor: pointer;" onclick="showSection('orders')">My Orders</a></li>
+              <li><a style="cursor: pointer;" onclick="showSection('chat')">Community Chat</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 style="color: var(--c-text); margin-bottom: 16px;">Contact Us</h4>
+            <ul style="list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem;">
+              <li><i class="ph ph-envelope"></i> support@kisaansathi.in</li>
+              <li><i class="ph ph-phone"></i> 1800-123-4567</li>
+              <li><i class="ph ph-map-pin"></i> Delhi, India</li>
+            </ul>
+          </div>
+        </div>
+        <div style="text-align: center; border-top: 1px solid var(--c-border); padding-top: 20px; font-size: 0.85rem;">
+          &copy; 2026 Kisaan Sathi Platform. securely processed via Razorpay. All rights reserved.
+        </div>
+      </footer>
+    </div>
+    <!-- END AUTHENTICATED VIEW -->
+
   </section>
 
   <!-- ══════════════════════ MARKETPLACE SECTION ══════════════════════ -->
   <section id="section-marketplace" class="section">
-    <div class="container">
+    <!-- Mandi Tracker Ticker -->
+    <div class="mandi-ticker-wrap">
+      <div class="mandi-ticker" id="mandi-ticker-content">
+        <!-- Javascript will populate this dynamically -->
+        <div class="mandi-item">Loading live market prices <i class="ph ph-spinner"></i></div>
+      </div>
+    </div>
+
+    <div class="container" style="padding-top: 20px;">
       <div class="marketplace-header">
         <div class="marketplace-title">
-          <h2>🏪 Crop Marketplace</h2>
+          <h2><i class="ph ph-storefront"></i> Crop Marketplace</h2>
           <p>Fresh produce directly from Indian farmers</p>
         </div>
         <div id="marketplace-farmer-add" style="display:none">
@@ -307,19 +500,19 @@
       </div>
 
       <div class="search-bar">
-        <input type="text" id="marketplace-search" placeholder="🔍 Search crops, vegetables, fruits..." oninput="debounceSearch()" />
+        <input type="text" id="marketplace-search" placeholder="Search crops, vegetables, fruits..." oninput="debounceSearch()" />
         <button class="btn btn-primary" onclick="loadMarketplace()">Search</button>
       </div>
 
       <div class="marketplace-filters" id="category-filters">
-        <button class="filter-pill active" data-cat="all" onclick="filterByCategory('all', this)">🌾 All</button>
-        <button class="filter-pill" data-cat="grain" onclick="filterByCategory('grain', this)">🌾 Grains</button>
-        <button class="filter-pill" data-cat="vegetable" onclick="filterByCategory('vegetable', this)">🥦 Vegetables</button>
-        <button class="filter-pill" data-cat="fruit" onclick="filterByCategory('fruit', this)">🍎 Fruits</button>
-        <button class="filter-pill" data-cat="pulse" onclick="filterByCategory('pulse', this)">🫘 Pulses</button>
-        <button class="filter-pill" data-cat="oilseed" onclick="filterByCategory('oilseed', this)">🌻 Oilseeds</button>
-        <button class="filter-pill" data-cat="spice" onclick="filterByCategory('spice', this)">🌶️ Spices</button>
-        <button class="filter-pill" data-cat="other" onclick="filterByCategory('other', this)">📦 Other</button>
+        <button class="filter-pill active" data-cat="all" onclick="filterByCategory('all', this)"><i class="ph ph-plant"></i> All</button>
+        <button class="filter-pill" data-cat="grain" onclick="filterByCategory('grain', this)"><i class="ph ph-plant"></i> Grains</button>
+        <button class="filter-pill" data-cat="vegetable" onclick="filterByCategory('vegetable', this)"><i class="ph ph-carrot"></i> Vegetables</button>
+        <button class="filter-pill" data-cat="fruit" onclick="filterByCategory('fruit', this)"><i class="ph ph-apple-logo"></i> Fruits</button>
+        <button class="filter-pill" data-cat="pulse" onclick="filterByCategory('pulse', this)"><i class="ph ph-dots-nine"></i> Pulses</button>
+        <button class="filter-pill" data-cat="oilseed" onclick="filterByCategory('oilseed', this)"><i class="ph ph-flower-tulip"></i> Oilseeds</button>
+        <button class="filter-pill" data-cat="spice" onclick="filterByCategory('spice', this)"><i class="ph ph-pepper"></i> Spices</button>
+        <button class="filter-pill" data-cat="other" onclick="filterByCategory('other', this)"><i class="ph ph-package"></i> Other</button>
       </div>
 
       <div id="products-grid" class="products-grid">
@@ -344,7 +537,7 @@
   <section id="section-crop" class="section">
     <div class="container">
       <div class="crop-header">
-        <div class="section-label">🌱 AI-Powered</div>
+        <div class="section-label"><i class="ph ph-seedling"></i> Smart Tool</div>
         <h2>Crop Recommendation Advisor</h2>
         <p>Enter your field conditions and get personalised crop suggestions with confidence scores — powered by our intelligent rule-based engine.</p>
       </div>
@@ -352,7 +545,7 @@
       <div class="crop-container">
         <!-- Form -->
         <div class="crop-form-card">
-          <h3>📊 Your Field Conditions</h3>
+          <h3><i class="ph ph-chart-bar"></i> Your Field Conditions</h3>
           <form id="crop-form" onsubmit="getCropRecommendation(event)">
             <div class="form-group">
               <label for="soil-type">Soil Type</label>
@@ -395,7 +588,7 @@
             </div>
 
             <button type="submit" class="btn btn-primary btn-full" id="crop-submit-btn">
-              🔍 Get Recommendations
+              <i class="ph ph-magnifying-glass"></i> Get Recommendations
             </button>
           </form>
         </div>
@@ -403,7 +596,7 @@
         <!-- Results -->
         <div id="crop-results-area">
           <div class="crop-placeholder">
-            <div class="crop-placeholder-icon">🌾</div>
+            <div class="crop-placeholder-icon"><i class="ph ph-plant"></i></div>
             <h3>Your recommendations will appear here</h3>
             <p>Fill in your field conditions and click "Get Recommendations" to see the best crops for your land.</p>
           </div>
@@ -416,7 +609,7 @@
   <section id="section-dashboard" class="section">
     <div class="container">
       <div class="dashboard-header">
-        <h2>📊 Farmer Dashboard</h2>
+        <h2><i class="ph ph-chart-bar"></i> Farmer Dashboard</h2>
         <p id="dashboard-welcome">Manage your listings and track your business.</p>
       </div>
 
@@ -436,10 +629,13 @@
         </div>
       </div>
 
+      <!-- Weather Widget Container -->
+      <div id="weather-widget-container"></div>
+
       <div class="dashboard-grid">
         <!-- Add Product Form -->
         <div class="dashboard-card">
-          <h3>➕ List New Crop</h3>
+          <h3><i class="ph ph-plus"></i> List New Crop</h3>
           <form id="add-product-form" onsubmit="addProduct(event)">
             <div class="form-group">
               <label for="p-name">Crop Name *</label>
@@ -501,10 +697,10 @@
 
         <!-- My Listings -->
         <div class="dashboard-card">
-          <h3>📦 My Listings</h3>
+          <h3><i class="ph ph-package"></i> My Listings</h3>
           <div id="my-products-list">
             <div class="empty-state">
-              <div class="empty-state-icon">📭</div>
+              <div class="empty-state-icon"><i class="ph ph-tray"></i></div>
               <p>No listings yet. Add your first crop!</p>
             </div>
           </div>
@@ -520,7 +716,7 @@
         <!-- Cart Items -->
         <div class="cart-items-panel">
           <div class="cart-header-row">
-            <h2>🛒 Shopping Cart</h2>
+            <h2><i class="ph ph-shopping-cart"></i> Shopping Cart</h2>
             <button class="btn btn-danger btn-sm" onclick="clearCart()" id="clear-cart-btn">Clear All</button>
           </div>
           <div id="cart-items-list">
@@ -540,7 +736,7 @@
             <span class="summary-total-price" id="cart-total">₹0.00</span>
           </div>
           <button class="btn btn-primary btn-full" style="margin-top:20px" onclick="proceedToCheckout()">
-            💳 Proceed to Checkout
+            <i class="ph ph-credit-card"></i> Proceed to Checkout
           </button>
           <button class="btn btn-secondary btn-full" style="margin-top:8px" onclick="showSection('marketplace')">
             ← Continue Shopping
@@ -556,7 +752,7 @@
       <div class="checkout-container">
         <!-- Checkout Form -->
         <div class="checkout-form">
-          <h2>💳 Checkout</h2>
+          <h2><i class="ph ph-credit-card"></i> Checkout</h2>
 
           <div class="checkout-step">
             <h3><span class="step-num">1</span> Delivery Address</h3>
@@ -585,14 +781,14 @@
             <h3><span class="step-num">3</span> Payment</h3>
             <div class="payment-options">
               <div class="payment-option selected">
-                <span>💳</span> Razorpay (UPI, Cards, Netbanking, Wallets)
+                <span><i class="ph ph-credit-card"></i></span> Razorpay (UPI, Cards, Netbanking, Wallets)
                 <span class="badge badge-green">Secure</span>
               </div>
             </div>
           </div>
 
           <button class="btn btn-primary btn-full btn-lg" onclick="initiatePayment()" id="pay-btn">
-            🔒 Pay Securely with Razorpay
+            <i class="ph ph-lock-key"></i> Pay Securely with Razorpay
           </button>
           <p style="text-align:center; font-size:0.8rem; color:var(--c-text-dim); margin-top:12px">
             🔐 Payments secured by Razorpay. Your data is encrypted and safe.
@@ -621,12 +817,12 @@
   <section id="section-orders" class="section">
     <div class="container">
       <div class="orders-header">
-        <h2>📦 My Orders</h2>
+        <h2><i class="ph ph-package"></i> My Orders</h2>
         <p>Track all your purchases and order statuses.</p>
       </div>
       <div id="orders-list">
         <div class="empty-state">
-          <div class="empty-state-icon">📭</div>
+          <div class="empty-state-icon"><i class="ph ph-tray"></i></div>
           <h3>No orders yet</h3>
           <p>You haven't placed any orders. Start shopping in the marketplace!</p>
           <button class="btn btn-primary" onclick="showSection('marketplace')">Browse Marketplace</button>
@@ -642,12 +838,12 @@
         <!-- Sidebar: User List -->
         <div class="chat-sidebar">
           <div class="chat-sidebar-header">
-            <h3>💬 Messages</h3>
+            <h3><i class="ph ph-chats"></i> Messages</h3>
             <p style="font-size:0.8rem; color:var(--c-text-muted)">Chat with farmers & buyers</p>
           </div>
           <div class="chat-users-list" id="chat-users-list">
             <div style="padding:24px; text-align:center; color:var(--c-text-muted)">
-              <div style="font-size:2rem">👥</div>
+              <div style="font-size:2rem"><i class="ph ph-users"></i></div>
               <p style="font-size:0.85rem">Loading users...</p>
             </div>
           </div>
@@ -656,7 +852,7 @@
         <!-- Chat Main Area -->
         <div class="chat-main" id="chat-main">
           <div class="chat-placeholder" id="chat-placeholder">
-            <div class="chat-placeholder-icon">💬</div>
+            <div class="chat-placeholder-icon"><i class="ph ph-chats"></i></div>
             <h3>Select a conversation</h3>
             <p>Choose a user from the left to start chatting</p>
           </div>

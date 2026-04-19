@@ -27,30 +27,22 @@ async function handleLogin(e) {
   const password = document.getElementById("login-password").value;
 
   try {
-    const res = await fetch("https://kisaan-sathi.onrender.com/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ email, password })
-    });
-
-    const data = await res.json();
+    const data = await apiRequest('/auth/login', 'POST', { email, password });
 
     if (data.success) {
       localStorage.setItem("ks_token", data.token);
       localStorage.setItem("ks_user", JSON.stringify(data.user));
 
-      alert("Login successful ✅");
+      toast.success("Login successful ✅", data.message);
       closeAuthModal();
       location.reload();
     } else {
-      alert(data.message);
+      toast.error('Login Failed', data.message);
     }
 
   } catch (err) {
     console.error(err);
-    alert("Server error");
+    toast.error("Error", "Server error");
   }
 }
 
@@ -127,12 +119,23 @@ function setAuthState(user) {
   document.getElementById('cart-nav-btn').style.display = '';
 
   // Farmer-only items (Dashboard)
-  const dashLink = document.querySelector('.farmer-only');
-  if (dashLink) {
-    dashLink.parentElement.style.display = user.role === 'farmer' ? '' : 'none';
-  }
+  document.querySelectorAll('.farmer-only').forEach(el => {
+    if (el.tagName === 'A') el.parentElement.style.display = user.role === 'farmer' ? '' : 'none';
+    else el.style.display = user.role === 'farmer' ? '' : 'none';
+  });
+  
   const farmerAddBtn = document.getElementById('marketplace-farmer-add');
   if (farmerAddBtn) farmerAddBtn.style.display = user.role === 'farmer' ? '' : 'none';
+
+  // Home Page Views
+  const guestHome = document.getElementById('guest-home-view');
+  const authHome  = document.getElementById('auth-home-view');
+  if (guestHome) guestHome.style.display = 'none';
+  if (authHome) {
+    authHome.style.display = 'block';
+    const nameEl = document.getElementById('auth-home-name');
+    if (nameEl) nameEl.textContent = user.name.split(' ')[0]; // Show first name
+  }
 
   // Initialize socket
   initSocket(user.id);
@@ -144,6 +147,12 @@ function clearAuthState() {
   document.getElementById('user-nav').style.display      = 'none';
   document.querySelectorAll('.auth-required').forEach(el => el.style.display = 'none');
   document.getElementById('cart-nav-btn').style.display  = 'none';
+
+  // Home Page Views
+  const guestHome = document.getElementById('guest-home-view');
+  const authHome  = document.getElementById('auth-home-view');
+  if (guestHome) guestHome.style.display = 'block';
+  if (authHome)  authHome.style.display = 'none';
 }
 
 /* ─── Initialize Socket ─────────────────────────────────────────── */
@@ -176,3 +185,55 @@ function initSocket(userId) {
     appendMessage(msg.message, 'sent', msg.timestamp);
   });
 }
+
+/* ─── Password Show/Hide Toggle ─────────────────────────────────── */
+function togglePassword(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = 'Hide';
+  } else {
+    input.type = 'password';
+    btn.textContent = 'Show';
+  }
+}
+
+/* ─── Password Strength Meter ───────────────────────────────────── */
+function checkPasswordStrength(password) {
+  const container = document.getElementById('pwd-strength-container');
+  const bar = document.getElementById('pwd-strength-bar');
+  const text = document.getElementById('pwd-strength-text');
+  
+  if (!password) {
+    container.style.display = 'none';
+    return;
+  }
+  
+  container.style.display = 'block';
+  
+  let strength = 0;
+  
+  if (password.length >= 6) strength += 25;
+  if (password.length >= 8) strength += 25;
+  if (/[A-Z]/.test(password)) strength += 15;
+  if (/[a-z]/.test(password)) strength += 15;
+  if (/[0-9]/.test(password)) strength += 10;
+  if (/[^A-Za-z0-9]/.test(password)) strength += 10;
+  
+  let color = '#ef4444'; // Red (Weak)
+  let label = 'Weak (Need 6+ chars, mix of numbers/letters)';
+  
+  if (strength >= 80) {
+    color = '#22c55e'; // Green (Strong)
+    label = 'Strong Password ✅';
+  } else if (strength >= 50) {
+    color = '#eab308'; // Yellow (Medium)
+    label = 'Medium (Add symbols or numbers)';
+  }
+  
+  bar.style.width = strength + '%';
+  bar.style.backgroundColor = color;
+  text.textContent = label;
+  text.style.color = color;
+}
+

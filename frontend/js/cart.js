@@ -5,7 +5,9 @@ let cartItems = [];
 
 function cartLoad() {
   try {
-    cartItems = JSON.parse(localStorage.getItem('ks_cart') || '[]');
+    const parsed = JSON.parse(localStorage.getItem('ks_cart') || '[]');
+    // Filter out invalid items to prevent NaN crashes
+    cartItems = parsed.filter(i => i && i.id && typeof i.qty === 'number' && !isNaN(i.qty));
   } catch { cartItems = []; }
   updateCartBadge();
 }

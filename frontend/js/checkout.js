@@ -88,9 +88,8 @@ async function initiatePayment() {
 
   // 3. Open Razorpay modal
   if (typeof Razorpay === 'undefined') {
-    // Simulate payment for demo (no real Razorpay keys)
-    simulatePaymentSuccess(currentOrderId, total);
-    return;
+    payBtn.disabled = false; payBtn.textContent = '🔒 Pay Securely with Razorpay';
+    return toast.error('Payment Error', 'Razorpay SDK failed to load. Please check your connection.');
   }
 
   const options = {
@@ -102,8 +101,11 @@ async function initiatePayment() {
     order_id: rzpData.orderId,
     prefill: { name, contact: phone, email: KS.user.email },
     theme:   { color: '#22C55E' },
-    handler: async (response) => {
-      await verifyPayment(response, currentOrderId, total);
+    handler: function (response) {
+      // Small timeout allows Razorpay's iframe to close itself before we take over
+      setTimeout(() => {
+        verifyPayment(response, currentOrderId, total);
+      }, 100);
     },
     modal: {
       ondismiss: () => toast.warning('Payment Cancelled', 'You dismissed the payment.')
@@ -135,18 +137,3 @@ async function verifyPayment(response, orderId, amount) {
   }
 }
 
-/* ─── Demo simulation (no Razorpay keys) ───────────────────────── */
-async function simulatePaymentSuccess(orderId, amount) {
-  showLoader();
-  // Mark order as completed without real payment
-  await apiRequest(`/orders/${orderId}/payment`, 'PUT', {
-    paymentStatus: 'completed',
-    paymentId: 'DEMO_PAY_' + Date.now(),
-    razorpayOrderId: 'DEMO_ORDER_' + Date.now()
-  });
-  hideLoader();
-  cartClear();
-  toast.success('Payment Successful! 🎉', 'Demo mode: order confirmed');
-  showSection('orders');
-  loadOrders();
-}

@@ -1,7 +1,15 @@
 /* ─── Global Config & API Helpers ─────────────────────────────── */
 
-const API_URL    = 'https://kisaan-sathi.onrender.com/api';
-const SOCKET_URL = 'https://kisaan-sathi.onrender.com';
+// Dynamically point to backend backend when testing locally (unless we are served BY the backend server)
+let BACKEND_URL = '';
+if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.protocol === 'file:') {
+  if (window.location.port !== '5000') {
+    BACKEND_URL = 'http://localhost:5000';
+  }
+}
+
+const API_URL    = `${BACKEND_URL}/api`;
+const SOCKET_URL = BACKEND_URL;
 
 /* ─── Global App State ────────────────────────────────────────── */
 window.KS = {
